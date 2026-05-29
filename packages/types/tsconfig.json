@@ -1,8 +1,0 @@
-{
-  "extends": "@prescribeflow/typescript-config/base",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src"
-  },
-  "include": ["src"]
-}
