@@ -1,13 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 import { FileText, Stethoscope, ArrowRight, Download } from "lucide-react";
 import Link from "next/link";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface PatientPrescriptionsProps {

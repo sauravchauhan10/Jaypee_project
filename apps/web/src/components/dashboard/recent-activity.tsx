@@ -1,13 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { formatDistanceToNow } from "date-fns";
+import { motion } from "framer-motion";
 import { FileText, UserPlus, CheckCircle2, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 
 interface Activity {
   id: string;

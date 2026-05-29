@@ -1,13 +1,13 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 import { Pill, CheckCircle2, Clock, Calendar as CalendarIcon, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 
 interface MedicineTimelineProps {
   prescriptions?: any[];

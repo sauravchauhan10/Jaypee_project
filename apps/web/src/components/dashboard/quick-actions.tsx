@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import { Plus, Users, Search, Activity } from "lucide-react";
 import Link from "next/link";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export function QuickActions() {
   const actions = [

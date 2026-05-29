@@ -2,10 +2,11 @@
 
 import { motion } from "framer-motion";
 import { Activity, Droplets, HeartPulse, ShieldAlert } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PatientMedicalHistoryProps {
   data?: {

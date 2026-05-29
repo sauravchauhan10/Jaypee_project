@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import { useAuthStore } from "@/store/auth-store";
-import { api } from "@/lib/api";
-import { Button } from "@/components/ui/button";
 
 // Import new Dashboard Components
 import { AnalyticsCards } from "@/components/dashboard/analytics-cards";
-import { PrescriptionTrends } from "@/components/dashboard/prescription-trends";
-import { RecentActivity } from "@/components/dashboard/recent-activity";
-import { QuickActions } from "@/components/dashboard/quick-actions";
 import { PatientDashboard } from "@/components/dashboard/patient-dashboard";
+import { PrescriptionTrends } from "@/components/dashboard/prescription-trends";
+import { QuickActions } from "@/components/dashboard/quick-actions";
+import { RecentActivity } from "@/components/dashboard/recent-activity";
+import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/auth-store";
 
 export default function DashboardIndex() {
   const { user } = useAuthStore();

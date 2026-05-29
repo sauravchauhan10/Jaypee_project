@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
   FileText, 
@@ -10,6 +8,8 @@ import {
   Pill,
   Settings
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";

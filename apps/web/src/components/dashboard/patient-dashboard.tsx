@@ -3,13 +3,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
 
-import { useAuthStore } from "@/store/auth-store";
-import { api } from "@/lib/api";
-
+import { PatientAiAssistant } from "./patient-ai-assistant";
 import { PatientMedicalHistory } from "./patient-medical-history";
 import { PatientMedicineTimeline } from "./patient-medicine-timeline";
 import { PatientPrescriptions } from "./patient-prescriptions";
-import { PatientAiAssistant } from "./patient-ai-assistant";
+
+import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/auth-store";
+
 
 export function PatientDashboard() {
   const { user } = useAuthStore();

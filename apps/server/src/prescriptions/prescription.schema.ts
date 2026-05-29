@@ -46,6 +46,17 @@ export const prescriptionQuerySchema = z.object({
   status: prescriptionStatusEnum.optional(),
   patientId: z.string().cuid().optional(),
   doctorId: z.string().cuid().optional(),
+  
+  // Advanced filters
+  search: z.string().optional(), // general text search on diagnosis, notes
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  medicineName: z.string().optional(),
+  
+  // Sorting
+  sortBy: z.enum(['createdAt', 'updatedAt', 'status', 'patientName']).default('createdAt'),
+  sortOrder: z.enum(['asc', 'desc']).default('desc'),
+
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
 });

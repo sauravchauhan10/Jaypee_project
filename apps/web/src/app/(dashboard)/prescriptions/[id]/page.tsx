@@ -1,10 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { toast } from "sonner";
 import {
   FileText,
   User,
@@ -15,11 +12,12 @@ import {
   AlertCircle,
   ArrowLeft,
 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import * as React from "react";
+import { toast } from "sonner";
 
-import { api } from "@/lib/api";
-import { useAuthStore } from "@/store/auth-store";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -28,6 +26,8 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { api } from "@/lib/api";
+import { useAuthStore } from "@/store/auth-store";
 
 // This would typically match the type returned by the backend `findById`
 interface PrescriptionDetail {

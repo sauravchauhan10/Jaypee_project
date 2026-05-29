@@ -1,8 +1,8 @@
 "use client";
 
-import { useRequireAuth } from "@/hooks/use-auth";
-import { Sidebar } from "@/components/sidebar";
 import { Navbar } from "@/components/navbar";
+import { Sidebar } from "@/components/sidebar";
+import { useRequireAuth } from "@/hooks/use-auth";
 
 export default function DashboardLayout({
   children,

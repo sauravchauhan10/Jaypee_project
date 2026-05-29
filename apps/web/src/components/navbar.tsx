@@ -1,10 +1,11 @@
 "use client";
 
 import { Bell, LogOut, Search, User } from "lucide-react";
-import { useLogout } from "@/hooks/use-auth";
+
+import { NotificationBell } from "@/components/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NotificationBell } from "@/components/notification-bell";
+import { useLogout } from "@/hooks/use-auth";
 
 export function Navbar() {
   const logoutMutation = useLogout();

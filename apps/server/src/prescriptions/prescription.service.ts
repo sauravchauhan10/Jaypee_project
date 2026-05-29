@@ -164,7 +164,11 @@ export const findAll = async (
   userRole: string,
   query: PrescriptionQueryInput,
 ) => {
-  const { page, limit, status, patientId, doctorId } = query;
+  const { 
+    page, limit, status, patientId, doctorId,
+    search, startDate, endDate, medicineName,
+    sortBy = 'createdAt', sortOrder = 'desc' 
+  } = query;
   const skip = (page - 1) * limit;
 
   const where: Prisma.PrescriptionWhereInput = {
@@ -186,12 +190,40 @@ export const findAll = async (
     where.status = status;
   }
 
+  if (search) {
+    where.OR = [
+      { diagnosis: { contains: search, mode: 'insensitive' } },
+      { notes: { contains: search, mode: 'insensitive' } },
+      { patient: { name: { contains: search, mode: 'insensitive' } } },
+    ];
+  }
+
+  if (startDate || endDate) {
+    where.createdAt = {};
+    if (startDate) where.createdAt.gte = new Date(startDate);
+    if (endDate) where.createdAt.lte = new Date(endDate);
+  }
+
+  if (medicineName) {
+    where.medicines = {
+      some: {
+        name: { contains: medicineName, mode: 'insensitive' },
+      },
+    };
+  }
+
+  // Map sort fields safely
+  let orderBy: Prisma.PrescriptionOrderByWithRelationInput = { createdAt: sortOrder };
+  if (sortBy === 'updatedAt') orderBy = { updatedAt: sortOrder };
+  else if (sortBy === 'status') orderBy = { status: sortOrder };
+  else if (sortBy === 'patientName') orderBy = { patient: { name: sortOrder } };
+
   const [data, total] = await Promise.all([
     prisma.prescription.findMany({
       where,
       skip,
       take: limit,
-      orderBy: { createdAt: 'desc' },
+      orderBy,
       include: {
         medicines: true,
         patient: { select: { id: true, name: true } },

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bot, Send, User, AlertCircle, X, Maximize2, Minimize2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
-import { useAuthStore } from "@/store/auth-store";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useAuthStore } from "@/store/auth-store";
 
 export function PatientAiAssistant() {
   const { user } = useAuthStore();

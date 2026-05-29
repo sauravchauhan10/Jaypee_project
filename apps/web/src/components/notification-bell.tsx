@@ -1,16 +1,14 @@
 "use client";
 
-import * as React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Bell, Check, Info, FileText, Pill } from "lucide-react";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import * as React from "react";
+import { toast } from "sonner";
 
-import { api } from "@/lib/api";
-import { useSocket } from "@/hooks/use-socket";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSocket } from "@/hooks/use-socket";
+import { api } from "@/lib/api";
 
 interface Notification {
   id: string;
