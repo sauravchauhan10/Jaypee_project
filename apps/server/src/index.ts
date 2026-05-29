@@ -38,7 +38,9 @@ for (const key of REQUIRED_ENV) {
 }
 
 const PORT = process.env.PORT ?? 4000;
-const CORS_ORIGIN = process.env.CORS_ORIGIN ?? 'http://localhost:3000';
+const CORS_ORIGIN = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',')
+  : ['http://localhost:3000'];
 
 // ── Security headers ──────────────────────────────────────────
 app.use((helmet as any)());
