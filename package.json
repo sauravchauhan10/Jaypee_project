@@ -1,0 +1,42 @@
+{
+  "name": "prescribeflow",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Digital Prescription Management Platform — Monorepo",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"@prescribeflow/*\" dev",
+    "dev:web": "pnpm --filter @prescribeflow/web dev",
+    "dev:server": "pnpm --filter @prescribeflow/server dev",
+    "build": "pnpm --recursive --filter \"@prescribeflow/*\" build",
+    "build:web": "pnpm --filter @prescribeflow/web build",
+    "build:server": "pnpm --filter @prescribeflow/server build",
+    "lint": "pnpm --recursive lint",
+    "lint:fix": "pnpm --recursive lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css}\" --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\" --ignore-path .prettierignore",
+    "typecheck": "pnpm --recursive typecheck",
+    "test": "pnpm --recursive test",
+    "db:generate": "pnpm --filter @prescribeflow/db db:generate",
+    "db:migrate": "pnpm --filter @prescribeflow/db db:migrate",
+    "db:migrate:prod": "pnpm --filter @prescribeflow/db db:migrate:prod",
+    "db:seed": "pnpm --filter @prescribeflow/db db:seed",
+    "db:studio": "pnpm --filter @prescribeflow/db db:studio",
+    "db:reset": "pnpm --filter @prescribeflow/db db:reset",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@prescribeflow/eslint-config": "workspace:*",
+    "@prescribeflow/typescript-config": "workspace:*",
+    "eslint": "^9.18.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.4.2",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.4"
+}

@@ -1,0 +1,429 @@
+// ============================================================
+// PrescribeFlow — Prisma Schema
+// Database: PostgreSQL
+// ORM: Prisma v6
+// Design: Enterprise Healthcare-Grade
+// ============================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum Role {
+  DOCTOR
+  PATIENT
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum PrescriptionStatus {
+  DRAFT      // Created but not finalized
+  ACTIVE     // Issued and currently valid
+  COMPLETED  // All medications completed
+  CANCELLED  // Voided by doctor or admin
+  EXPIRED    // Past the expiry date
+}
+
+enum MedicationTiming {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+  AS_NEEDED
+}
+
+enum NotificationType {
+  PRESCRIPTION_CREATED
+  PRESCRIPTION_UPDATED
+  PRESCRIPTION_CANCELLED
+  MEDICATION_REMINDER
+  APPOINTMENT_REMINDER
+  SYSTEM
+}
+
+enum AuditAction {
+  USER_REGISTERED
+  USER_LOGIN
+  USER_LOGOUT
+  USER_DEACTIVATED
+  USER_REACTIVATED
+  USER_PROFILE_UPDATED
+  PRESCRIPTION_CREATED
+  PRESCRIPTION_UPDATED
+  PRESCRIPTION_CANCELLED
+  PRESCRIPTION_DOWNLOADED
+  PRESCRIPTION_VIEWED
+  PATIENT_RECORD_UPDATED
+  MEDICINE_SEARCHED
+  MEDICAL_HISTORY_ADDED
+  AUDIT_LOG_EXPORTED
+}
+
+// ============================================================
+// USER & AUTH
+// ============================================================
+
+/// Core user — single table for all roles, profile details in separate relations
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  name         String
+  role         Role
+  phone        String?
+  avatarUrl    String?   @map("avatar_url")
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  doctorProfile        DoctorProfile?
+  patientProfile       PatientProfile?
+  refreshTokens        RefreshToken[]
+  prescriptionsGiven   Prescription[]   @relation("DoctorPrescriptions")
+  prescriptionsReceived Prescription[]  @relation("PatientPrescriptions")
+  medicalHistoriesAdded MedicalHistory[] @relation("DoctorHistories")
+  medicalHistories     MedicalHistory[] @relation("PatientHistories")
+  auditLogs            AuditLog[]
+  notifications        Notification[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+/// Extended profile for doctors — specialty, license, clinic info
+model DoctorProfile {
+  id             String  @id @default(cuid())
+  userId         String  @unique @map("user_id")
+  specialty      String
+  licenseNumber  String  @unique @map("license_number")
+  clinicName     String? @map("clinic_name")
+  clinicAddress  String? @map("clinic_address")
+  clinicPhone    String? @map("clinic_phone")
+  signatureUrl   String? @map("signature_url")
+  bio            String?
+  yearsOfExp     Int?    @map("years_of_experience")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([licenseNumber])
+  @@index([specialty])
+  @@map("doctor_profiles")
+}
+
+/// Extended profile for patients — demographics and medical baseline
+model PatientProfile {
+  id         String  @id @default(cuid())
+  userId     String  @unique @map("user_id")
+  dob        DateTime @map("date_of_birth")
+  gender     Gender
+  bloodGroup String? @map("blood_group")
+  height     Float?  // cm
+  weight     Float?  // kg
+  allergies  String[] // PostgreSQL text array
+  conditions String[] // Chronic conditions
+
+  // Emergency contact
+  emergencyContactName  String? @map("emergency_contact_name")
+  emergencyContactPhone String? @map("emergency_contact_phone")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([gender])
+  @@index([bloodGroup])
+  @@map("patient_profiles")
+}
+
+/// JWT refresh tokens — rotation pattern with revocation support
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash") // Store hash, not raw token
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  ipAddress String?   @map("ip_address")
+  userAgent String?   @map("user_agent")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+// ============================================================
+// MEDICINE CATALOG
+// ============================================================
+
+/// Global medicine catalog — searchable reference database
+model Medicine {
+  id                  String   @id @default(cuid())
+  name                String
+  genericName         String?  @map("generic_name")
+  brandNames          String[] @map("brand_names")  // Known brand variants
+  category            String                         // e.g. Antibiotic, Analgesic
+  form                String?                        // Tablet, Capsule, Syrup, Injection
+  strength            String?                        // e.g. 500mg, 10mg/5ml
+  defaultDosage       String?  @map("default_dosage")
+  defaultFrequency    String?  @map("default_frequency")
+  defaultDuration     String?  @map("default_duration")
+  sideEffects         String?  @map("side_effects")
+  contraindications   String?
+  commonInteractions  String[] @map("common_interactions") // Drug names it interacts with
+  requiresPrescription Boolean @default(true) @map("requires_prescription")
+  isControlled        Boolean  @default(false) @map("is_controlled")
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  prescriptionMedicines PrescriptionMedicine[]
+
+  @@index([name])
+  @@index([genericName])
+  @@index([category])
+  @@index([deletedAt])
+  @@map("medicines")
+}
+
+// ============================================================
+// PRESCRIPTIONS
+// ============================================================
+
+/// Core prescription entity — links doctor to patient with clinical details
+model Prescription {
+  id        String             @id @default(cuid())
+  doctorId  String             @map("doctor_id")
+  patientId String             @map("patient_id")
+
+  // Clinical details
+  diagnosis String
+  symptoms  String?
+  notes     String?
+  status    PrescriptionStatus @default(DRAFT)
+
+  // Document
+  pdfUrl    String?  @map("pdf_url")      // Cloudinary URL
+  qrToken   String   @unique @map("qr_token") @default(cuid()) // For QR scan verification
+
+  // Validity
+  date      DateTime @default(now())
+  expiresAt DateTime? @map("expires_at")
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  doctor    User                   @relation("DoctorPrescriptions", fields: [doctorId], references: [id])
+  patient   User                   @relation("PatientPrescriptions", fields: [patientId], references: [id])
+  medicines PrescriptionMedicine[]
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([status])
+  @@index([qrToken])
+  @@index([date])
+  @@index([deletedAt])
+  @@index([doctorId, patientId])  // Composite: doctor's prescriptions for a patient
+  @@index([patientId, status])    // Composite: patient's active prescriptions
+  @@map("prescriptions")
+}
+
+/// Junction table: many medications on one prescription (with full detail)
+model PrescriptionMedicine {
+  id             String           @id @default(cuid())
+  prescriptionId String           @map("prescription_id")
+  medicineId     String?          @map("medicine_id") // Null if free-text entry
+  
+  // Can be populated from Medicine catalog or typed freely
+  name         String
+  dosage       String
+  frequency    String
+  timing       MedicationTiming
+  duration     String
+  instructions String?
+  quantity     Int?               // Total units to dispense
+
+  // Adherence — has the patient confirmed taking this dose?
+  adherenceLogs AdherenceLog[]
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  prescription Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  medicine     Medicine?    @relation(fields: [medicineId], references: [id])
+
+  @@index([prescriptionId])
+  @@index([medicineId])
+  @@map("prescription_medicines")
+}
+
+/// Daily medication compliance tracking per patient
+model AdherenceLog {
+  id                     String   @id @default(cuid())
+  prescriptionMedicineId String   @map("prescription_medicine_id")
+  patientId              String   @map("patient_id")
+  date                   DateTime // The day the dose applies to (date only, time=00:00)
+  timeSlot               MedicationTiming @map("time_slot")
+  taken                  Boolean  @default(false)
+  takenAt                DateTime? @map("taken_at") // Actual timestamp when marked
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  prescriptionMedicine PrescriptionMedicine @relation(fields: [prescriptionMedicineId], references: [id], onDelete: Cascade)
+
+  @@unique([prescriptionMedicineId, date, timeSlot]) // Enforce one log per dose per day
+  @@index([patientId])
+  @@index([date])
+  @@index([taken])
+  @@map("adherence_logs")
+}
+
+// ============================================================
+// MEDICAL HISTORY
+// ============================================================
+
+/// Patient's historical medical records — lab reports, diagnoses, procedures
+model MedicalHistory {
+  id          String   @id @default(cuid())
+  patientId   String   @map("patient_id")
+  doctorId    String?  @map("doctor_id")  // Optional: who added the record
+
+  title       String
+  description String
+  recordDate  DateTime @map("record_date")
+  category    String?  // e.g. "Lab Report", "Surgery", "Vaccination", "Allergy"
+  attachmentUrl String? @map("attachment_url") // Cloudinary URL for uploaded document
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  patient User  @relation("PatientHistories", fields: [patientId], references: [id])
+  doctor  User? @relation("DoctorHistories", fields: [doctorId], references: [id])
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([recordDate])
+  @@index([category])
+  @@index([deletedAt])
+  @@map("medical_histories")
+}
+
+// ============================================================
+// AUDIT LOG
+// ============================================================
+
+/// Immutable audit trail — records every significant action in the system
+/// NOTE: No updatedAt or deletedAt — audit records are NEVER modified
+model AuditLog {
+  id           String      @id @default(cuid())
+  userId       String      @map("user_id")       // Actor who performed the action
+  action       AuditAction
+  resourceType String      @map("resource_type") // e.g. "Prescription", "User"
+  resourceId   String?     @map("resource_id")   // ID of the affected resource
+  metadata     Json?                              // Contextual details (old/new values, etc.)
+  ipAddress    String?     @map("ip_address")
+  userAgent    String?     @map("user_agent")
+  createdAt    DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([resourceType])
+  @@index([resourceId])
+  @@index([createdAt])
+  @@index([userId, action])          // Composite: all actions by a user
+  @@index([resourceType, resourceId]) // Composite: all events on a resource
+  @@map("audit_logs")
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+/// In-app notifications for all users
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean          @default(false) @map("is_read")
+  readAt    DateTime?        @map("read_at")
+  metadata  Json?            // e.g. { prescriptionId: "...", doctorName: "..." }
+
+  // Soft delete
+  deletedAt DateTime? @map("deleted_at")
+
+  // Timestamps
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+  @@index([userId, isRead]) // Composite: unread notifications per user
+  @@map("notifications")
+}

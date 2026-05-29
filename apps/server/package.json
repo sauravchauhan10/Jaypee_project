@@ -1,0 +1,49 @@
+{
+  "name": "@prescribeflow/server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PrescribeFlow — Express.js API server",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@prescribeflow/db": "workspace:*",
+    "@prescribeflow/types": "workspace:*",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^2.5.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jose": "^5.9.6",
+    "morgan": "^1.10.0",
+    "openai": "^6.39.1",
+    "pdfkit": "^0.18.0",
+    "qrcode": "^1.5.4",
+    "socket.io": "^4.8.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@prescribeflow/eslint-config": "workspace:*",
+    "@prescribeflow/typescript-config": "workspace:*",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.10.7",
+    "@types/pdfkit": "^0.17.6",
+    "@types/qrcode": "^1.5.6",
+    "eslint": "^9.18.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
