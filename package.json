@@ -4,6 +4,7 @@
   "private": true,
   "description": "Digital Prescription Management Platform — Monorepo",
   "scripts": {
+    "postinstall": "pnpm db:generate",
     "dev": "pnpm --parallel --filter \"@prescribeflow/*\" dev",
     "dev:web": "pnpm --filter @prescribeflow/web dev",
     "dev:server": "pnpm --filter @prescribeflow/server dev",
