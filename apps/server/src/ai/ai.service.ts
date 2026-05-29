@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import type { Response } from 'express';
 
 // Initialize OpenAI client. Requires OPENAI_API_KEY environment variable.
-const openai = new OpenAI();
+const openai = new (OpenAI as any)();
 
 const SYSTEM_PROMPT = `You are a helpful, empathetic, and highly accurate medical information assistant for patients. 
 Your goal is to provide clear, simple, and educational information about diseases, conditions, and medications.

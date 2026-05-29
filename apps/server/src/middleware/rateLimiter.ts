@@ -5,7 +5,7 @@
 import rateLimit from 'express-rate-limit';
 
 // ── Auth endpoints: strict (5 requests / 15 minutes) ──────────
-export const authRateLimiter = rateLimit({
+export const authRateLimiter = (rateLimit as any)({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5,
   standardHeaders: 'draft-7',
@@ -22,7 +22,7 @@ export const authRateLimiter = rateLimit({
 });
 
 // ── Refresh endpoint: more lenient (30 requests / 15 minutes) ─
-export const refreshRateLimiter = rateLimit({
+export const refreshRateLimiter = (rateLimit as any)({
   windowMs: 15 * 60 * 1000,
   max: 30,
   standardHeaders: 'draft-7',
@@ -39,7 +39,7 @@ export const refreshRateLimiter = rateLimit({
 });
 
 // ── General API: broad (100 requests / minute) ────────────────
-export const generalRateLimiter = rateLimit({
+export const generalRateLimiter = (rateLimit as any)({
   windowMs: 60 * 1000, // 1 minute
   max: 100,
   standardHeaders: 'draft-7',
