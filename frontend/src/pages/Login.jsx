@@ -1,0 +1,131 @@
+// src/pages/Login.jsx
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
+
+const ROLE_REDIRECT = { doctor: '/doctor', patient: '/patient' };
+
+const Login = () => {
+  const { login } = useAuth();
+  const navigate  = useNavigate();
+
+  const [form, setForm]     = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState('');
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const user = await login(form);
+      navigate(ROLE_REDIRECT[user.role], { replace: true });
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Login failed. Please try again.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 flex items-center justify-center p-4">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary-600/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent-500/10 rounded-full blur-3xl" />
+      </div>
+
+      <div className="relative w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
+          <p className="text-primary-300 mt-1 text-sm">Smart Digital Prescription Platform</p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl">
+          {error && (
+            <div id="login-error" className="mb-4 p-3 rounded-lg bg-red-500/20 border border-red-400/40 text-red-200 text-sm flex items-center gap-2">
+              <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </div>
+          )}
+
+          <form id="login-form" onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-primary-200 mb-1.5">
+                Email Address
+              </label>
+              <input
+                id="email" name="email" type="email" autoComplete="email"
+                value={form.email} onChange={handleChange} required
+                placeholder="you@example.com"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-primary-400 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition"
+              />
+            </div>
+
+            {/* Password */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="password" className="block text-sm font-medium text-primary-200">
+                  Password
+                </label>
+                <Link to="/forgot-password" id="go-to-forgot-password" className="text-sm text-primary-300 hover:text-white transition">
+                  Forgot Password?
+                </Link>
+              </div>
+              <input
+                id="password" name="password" type="password" autoComplete="current-password"
+                value={form.password} onChange={handleChange} required
+                placeholder="••••••••"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-primary-400 text-sm focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/40 transition"
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              id="login-submit"
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 rounded-xl bg-white text-primary-800 font-semibold text-sm hover:bg-primary-50 active:scale-95 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg"
+            >
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+                  Signing in…
+                </span>
+              ) : 'Sign In'}
+            </button>
+          </form>
+
+          <p className="text-center text-primary-300 text-sm mt-6">
+            Don't have an account?{' '}
+            <Link to="/register" id="go-to-register" className="text-white font-semibold hover:underline">
+              Create one
+            </Link>
+          </p>
+        </div>
+
+        {/* Demo hint */}
+        <p className="text-center text-primary-500 text-xs mt-4">
+          Secure login powered by JWT authentication
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default Login;
